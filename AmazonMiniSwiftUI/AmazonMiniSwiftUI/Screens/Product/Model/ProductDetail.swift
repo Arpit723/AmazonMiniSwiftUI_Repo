@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Product Detail Model
 
-struct ProductDetail: Decodable, Identifiable, Hashable {
+struct ProductDetail: Decodable, Identifiable, Hashable, Sendable {
     let id: Int
     let title: String
     let description: String
@@ -36,7 +36,7 @@ struct ProductDetail: Decodable, Identifiable, Hashable {
 
 // MARK: - Dimensions
 
-struct Dimensions: Decodable, Hashable {
+struct Dimensions: Decodable, Hashable, Sendable {
     let width: Double
     let height: Double
     let depth: Double
@@ -44,7 +44,7 @@ struct Dimensions: Decodable, Hashable {
 
 // MARK: - Review
 
-struct Review: Decodable, Hashable {
+struct Review: Decodable, Hashable, Sendable {
     let rating: Int
     let comment: String
     let date: String
@@ -59,7 +59,7 @@ struct Review: Decodable, Hashable {
 
 // MARK: - Meta
 
-struct Meta: Decodable, Hashable {
+struct Meta: Decodable, Hashable, Sendable {
     let createdAt: String
     let updatedAt: String
     let barcode: String

@@ -1,11 +1,11 @@
-struct ProductResponse: Decodable {
+struct ProductResponse: Decodable, Sendable {
     let products: [Product]
     let total: Int
     let skip: Int
     let limit: Int
 }
 
-struct Product: Decodable, Identifiable, Hashable {
+struct Product: Decodable, Identifiable, Hashable, Sendable {
     let id: Int
     let title: String
     let description: String
