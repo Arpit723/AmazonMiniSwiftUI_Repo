@@ -38,7 +38,7 @@ final class ProductListViewModel: ObservableObject {
 
     private func observeSearchText() {
         Task {
-            try await self.performSearch(query: searchText)
+            await self.performSearch(query: searchText)
         }
     }
 

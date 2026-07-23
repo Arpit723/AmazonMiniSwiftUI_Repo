@@ -1,6 +1,6 @@
 import Foundation
 
-final class ProductService {
+actor ProductService {
     private let session: URLSession
 
     init(session: URLSession = .shared) {
@@ -8,7 +8,7 @@ final class ProductService {
     }
 
     func fetchProducts(limit: Int, skip: Int) async throws -> [Product] {
-        print("\(#function) \(Thread.current.isMainThread)")
+//        print("\(#function) \(Thread.)")
         guard let url = URL(string: "https://dummyjson.com/products?limit=\(limit)&skip=\(skip)") else {
             throw URLError(.badURL)
         }
