@@ -1,9 +1,7 @@
-import Combine
 import Foundation
 
 final class ProductService {
     private let session: URLSession
-    private var cancellables = Set<AnyCancellable>()
 
     init(session: URLSession = .shared) {
         self.session = session
@@ -46,19 +44,20 @@ final class ProductService {
         return decoded.products
     }
     
-    func fetchProductDetail(productId: Int) async -> AnyPublisher<ProductDetail, Error> {
+    func fetchProductDetail(productId: Int) async throws -> ProductDetail {
         print("\(#function)")
- 
+
         guard let url = URL(string: "https://dummyjson.com/products/\(productId)") else {
-            return Fail(error: URLError(.badURL))
-                .eraseToAnyPublisher()
+            throw URLError(.badURL)
         }
         print("URL \(url.absoluteString)")
+        let (data, response) = try await session.data(from: url)
 
-        return session.dataTaskPublisher(for: url)
-            .map(\.data)
-            .decode(type: ProductDetail.self, decoder: JSONDecoder())
-            .receive(on: DispatchQueue.main)
-            .eraseToAnyPublisher()
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+
+        return try JSONDecoder().decode(ProductDetail.self, from: data)
     }
 }
