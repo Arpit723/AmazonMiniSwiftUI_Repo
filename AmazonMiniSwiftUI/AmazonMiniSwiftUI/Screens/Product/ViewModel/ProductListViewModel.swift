@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 
 @MainActor
@@ -11,8 +10,6 @@ final class ProductListViewModel: ObservableObject {
     @Published var canLoadMorePages = true
 
     private let service: ProductService
-    private var cancellables = Set<AnyCancellable>()
-    private var activeRequest: AnyCancellable?
 
     private var searchTask: Task<Void, Never>?
 

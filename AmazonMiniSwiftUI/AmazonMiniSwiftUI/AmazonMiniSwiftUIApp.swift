@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct AmazonMiniSwiftUIApp: App {
+    @State private var cartViewModel = CartViewModel()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -26,6 +28,7 @@ struct AmazonMiniSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(cartViewModel)
         }
         .modelContainer(sharedModelContainer)
     }

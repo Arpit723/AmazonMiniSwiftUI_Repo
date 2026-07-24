@@ -1,8 +1,9 @@
 import SwiftUI
-import Combine
 
 struct ProductListView: View {
     @StateObject private var viewModel = ProductListViewModel()
+    @Environment(CartViewModel.self) private var cartViewModel
+    @State private var showCart = false
     var body: some View {
         NavigationStack {
             Group {
@@ -21,6 +22,30 @@ struct ProductListView: View {
                     viewModel.searchTextChanged()
                 }
                 .navigationTitle("Products")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showCart = true
+                        } label: {
+                            Image(systemName: "cart")
+                                .overlay(alignment: .topTrailing) {
+                                    if cartViewModel.itemCount > 0 {
+                                        Text("\(cartViewModel.itemCount)")
+                                            .font(.caption2)
+                                            .fontWeight(.bold)
+                                            .foregroundStyle(.white)
+                                            .padding(5)
+                                            .background(Color.red, in: Circle())
+                                            .offset(x: 7, y: -7)
+                                    }
+                                }
+                        }
+                        .accessibilityLabel("Cart, \(cartViewModel.itemCount) items")
+                    }
+                }
+                .navigationDestination(isPresented: $showCart) {
+                    CartView()
+                }
                 .task {
                     await viewModel.loadProducts()
                 }
@@ -58,4 +83,5 @@ struct ProductListView: View {
 
 #Preview {
     ProductListView()
+        .environment(CartViewModel())
 }
