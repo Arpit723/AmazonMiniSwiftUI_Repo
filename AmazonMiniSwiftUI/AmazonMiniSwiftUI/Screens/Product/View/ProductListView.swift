@@ -3,7 +3,8 @@ import SwiftUI
 struct ProductListView: View {
     @StateObject private var viewModel = ProductListViewModel()
     @Environment(CartViewModel.self) private var cartViewModel
-    @State private var showCart = false
+
+
     var body: some View {
         NavigationStack {
             Group {
@@ -22,12 +23,13 @@ struct ProductListView: View {
                     viewModel.searchTextChanged()
                 }
                 .navigationTitle("Products")
+            /*
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             showCart = true
                         } label: {
-                            Image(systemName: "cart")
+                            Image(systemName: "cart").tint(.black)
                                 .overlay(alignment: .topTrailing) {
                                     if cartViewModel.itemCount > 0 {
                                         Text("\(cartViewModel.itemCount)")
@@ -43,9 +45,39 @@ struct ProductListView: View {
                         .accessibilityLabel("Cart, \(cartViewModel.itemCount) items")
                     }
                 }
-                .navigationDestination(isPresented: $showCart) {
-                    CartView()
+             */
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        NavigationLink { CartView() } label: { /* your existing cart icon */
+                        
+                            Image(systemName: "cart").tint(.black)
+                                .overlay(alignment: .topTrailing) {
+                                    if cartViewModel.itemCount > 0 {
+                                        Text("\(cartViewModel.itemCount)")
+                                            .font(.caption2)
+                                            .fontWeight(.bold)
+                                            .foregroundStyle(.white)
+                                            .padding(5)
+                                            .background(Color.red, in: Circle())
+                                            .offset(x: 7, y: -7)
+                                    }
+                                }
+                            
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        NavigationLink {
+                            OrderHistoryView()
+                        } label: {
+                            Image(systemName: "clock.arrow.circlepath")
+                        }
+                    }
                 }
+            
+            
+//                .navigationDestination(isPresented: $showCart) {
+//                    CartView()
+//                }
                 .task {
                     await viewModel.loadProducts()
                 }

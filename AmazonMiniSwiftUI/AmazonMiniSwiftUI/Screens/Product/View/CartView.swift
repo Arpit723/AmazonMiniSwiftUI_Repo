@@ -17,11 +17,17 @@ import SwiftUI
 // It just sets navigationTitle("Cart").
 struct CartView: View {
     @Environment(CartViewModel.self) private var cartViewModel
+    @Environment(CheckoutViewModel.self) private var checkoutViewModel
+    
+
+
     @State private var showCheckoutAlert = false
+    @State private var isFailed = false
+
 
     var body: some View {
         Group {
-            if cartViewModel.isLoading && cartViewModel.items.isEmpty {
+            if (cartViewModel.isLoading && cartViewModel.items.isEmpty) || checkoutViewModel.state == .processing {
                 ProgressView()
             } else if let error = cartViewModel.error, cartViewModel.items.isEmpty {
                 Text("Error: \(error)")
@@ -37,10 +43,10 @@ struct CartView: View {
         }
         .navigationTitle("Cart")
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Checkout", isPresented: $showCheckoutAlert) {
+        .alert(isFailed ? "Error" : "Success", isPresented: $showCheckoutAlert) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text("Checkout is not implemented in this demo.")
+            Text(isFailed ? "Checkout  Failed" : "Checkout successful")
         }
     }
 
@@ -96,7 +102,17 @@ struct CartView: View {
             }
             Spacer()
             Button("Proceed to Checkout") {
-                showCheckoutAlert = true
+                Task {
+                    await checkoutViewModel.pay()
+                    
+                    if checkoutViewModel.state == .success(transactionId: checkoutViewModel.currentTransactionStatus){
+                        isFailed = false
+                        showCheckoutAlert = true
+                    } else if checkoutViewModel.state == .failed(reason: checkoutViewModel.currentTransactionStatus) {
+                        isFailed = true
+                        showCheckoutAlert = true
+                    }
+                }
             }
             .buttonStyle(.borderedProminent)
         }
