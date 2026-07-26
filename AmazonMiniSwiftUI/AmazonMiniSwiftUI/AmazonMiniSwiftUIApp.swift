@@ -12,6 +12,7 @@ import SwiftData
 struct AmazonMiniSwiftUIApp: App {
     @State private var cartViewModel = CartViewModel()
     @State private var checkoutViewModel: CheckoutViewModel
+    @State private var authViewModel = AuthViewModel()
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -34,8 +35,10 @@ struct AmazonMiniSwiftUIApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(cartViewModel).environment(checkoutViewModel)
+            RootView()
+                .environment(authViewModel)
+                .environment(cartViewModel)
+                .environment(checkoutViewModel)
         }
         .modelContainer(sharedModelContainer)
     }

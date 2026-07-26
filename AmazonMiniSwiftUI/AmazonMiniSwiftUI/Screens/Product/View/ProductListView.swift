@@ -3,6 +3,7 @@ import SwiftUI
 struct ProductListView: View {
     @StateObject private var viewModel = ProductListViewModel()
     @Environment(CartViewModel.self) private var cartViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
 
 
     var body: some View {
@@ -47,6 +48,15 @@ struct ProductListView: View {
                 }
              */
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Menu {
+                            Button("Logout", role: .destructive) {
+                                authViewModel.logout()
+                            }
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                        }
+                    }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         NavigationLink { CartView() } label: { /* your existing cart icon */
                         
@@ -116,4 +126,5 @@ struct ProductListView: View {
 #Preview {
     ProductListView()
         .environment(CartViewModel())
+        .environment(AuthViewModel())
 }
