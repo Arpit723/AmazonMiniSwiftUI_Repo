@@ -31,7 +31,7 @@ struct CartView: View {
                 ProgressView()
             } else if let error = cartViewModel.error, cartViewModel.items.isEmpty {
                 Text("Error: \(error)")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.errorRed)
             } else if cartViewModel.items.isEmpty {
                 emptyState
             } else {
@@ -91,32 +91,30 @@ struct CartView: View {
 
     // Pinned below the List (it's outside the List, so it never scrolls away).
     private var checkoutFooter: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
+        VStack(spacing: AppSpacing.md) {
+            HStack {
                 Text("Subtotal")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text("$\(cartViewModel.subtotal, specifier: "%.2f")")
-                    .font(.title3)
-                    .bold()
+                    .font(AppFont.subheadline)
+                    .foregroundStyle(Color.brandSecondary)
+                Spacer()
+                PriceText(amount: cartViewModel.subtotal, font: AppFont.title2, color: Color.brandNavy)
             }
-            Spacer()
-            Button("Proceed to Checkout") {
-                Task {
-                    await checkoutViewModel.pay()
-                    
-                    if checkoutViewModel.state == .success(transactionId: checkoutViewModel.currentTransactionStatus){
-                        isFailed = false
-                        showCheckoutAlert = true
-                    } else if checkoutViewModel.state == .failed(reason: checkoutViewModel.currentTransactionStatus) {
-                        isFailed = true
-                        showCheckoutAlert = true
-                    }
-                }
+            PrimaryButton(title: "Proceed to Checkout") {
+                Task { await checkout() }
             }
-            .buttonStyle(.borderedProminent)
         }
         .padding()
         .background(.regularMaterial)
+    }
+
+    private func checkout() async {
+        await checkoutViewModel.pay()
+        if checkoutViewModel.state == .success(transactionId: checkoutViewModel.currentTransactionStatus) {
+            isFailed = false
+            showCheckoutAlert = true
+        } else if checkoutViewModel.state == .failed(reason: checkoutViewModel.currentTransactionStatus) {
+            isFailed = true
+            showCheckoutAlert = true
+        }
     }
 }

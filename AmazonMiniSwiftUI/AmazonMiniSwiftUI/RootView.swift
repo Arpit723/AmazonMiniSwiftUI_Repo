@@ -23,6 +23,6 @@ struct RootView: View {
             } else {
                 AuthFlowView()
             }
-        }
+        }.tint(Color.brandOrange)
     }
 }

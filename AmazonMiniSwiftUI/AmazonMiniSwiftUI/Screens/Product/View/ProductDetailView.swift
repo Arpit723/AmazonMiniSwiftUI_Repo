@@ -12,17 +12,17 @@ struct ProductDetailView: View {
             if viewModel.isLoading {
                 ProgressView()
             } else if let error = viewModel.error {
-                Text("Error: \(error)").foregroundStyle(.red)
+                Text("Error: \(error)").foregroundStyle(Color.errorRed)
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 5) {
+                    VStack(alignment: .leading, spacing: AppSpacing.md) {
                         imageGallery
                         infoSection
                     }
                 }
             }
-
-        }.navigationTitle(viewModel.productDetail?.title ?? "")
+        }
+        .navigationTitle(viewModel.productDetail?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadProductDetail(productId: productId)
@@ -30,50 +30,55 @@ struct ProductDetailView: View {
         .overlay(alignment: .top) {
             if showAddedConfirmation {
                 Text("Added to Cart")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 16)
+                    .font(AppFont.footnote.weight(.semibold))
+                    .foregroundStyle(Color.brandNavy)
+                    .padding(.horizontal, AppSpacing.lg)
                     .padding(.vertical, 10)
                     .background(.regularMaterial, in: Capsule())
                     .shadow(radius: 4)
                     .transition(.move(edge: .top).combined(with: .opacity))
-                    .padding(.top, 8)
+                    .padding(.top, AppSpacing.sm)
             }
         }
         .animation(.easeInOut, value: showAddedConfirmation)
     }
-    
-    
-    private var imageGallery : some View {
-        ScrollView(.horizontal, showsIndicators:false ) {
-            HStack(alignment: .center, spacing: 5) {
+
+    private var imageGallery: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: AppSpacing.sm) {
                 ForEach(viewModel.productDetail?.images ?? [], id: \.self) { imageUrlString in
-                    AsyncImage(url: URL(string: imageUrlString)) { image in image.resizable().aspectRatio(contentMode: .fit)
-                    } placeholder: {
-                        ProgressView()
-                    }.frame(width: 200, height: 200)
+                    RemoteImage(urlString: imageUrlString)
+                        .frame(width: 240, height: 240)
+                        .background(Color.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: AppRadius.lg, style: .continuous))
                 }
             }
+            .padding(.horizontal)
         }
     }
-    private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(viewModel.productDetail?.title ?? "").font(.title).bold()
-            Text(viewModel.productDetail?.category ?? "").foregroundStyle(.secondary)
-            Text("$\(viewModel.productDetail?.price ?? 0.0, specifier: "%.2f")").font(.headline)
-            Text(viewModel.productDetail?.description ?? "")
 
-            Button {
+    private var infoSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
+            Text(viewModel.productDetail?.title ?? "")
+                .font(AppFont.title)
+                .foregroundStyle(Color.brandNavy)
+
+            Text((viewModel.productDetail?.category ?? "").capitalized)
+                .font(AppFont.subheadline)
+                .foregroundStyle(Color.brandSecondary)
+
+            PriceText(amount: viewModel.productDetail?.price ?? 0, font: AppFont.headline, color: Color.brandNavy)
+
+            Text(viewModel.productDetail?.description ?? "")
+                .font(AppFont.body)
+                .foregroundStyle(Color.brandText)
+
+            PrimaryButton(title: "Add to Cart") {
                 if let product = viewModel.productDetail {
                     cartViewModel.addItem(product: product)
                     showConfirmation()
                 }
-            } label: {
-                Text("Add to Cart")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
             }
-            .buttonStyle(.borderedProminent)
         }
         .padding()
     }

@@ -30,7 +30,7 @@ struct ProductListView: View {
                         Button {
                             showCart = true
                         } label: {
-                            Image(systemName: "cart").tint(.black)
+                            Image(systemName: "cart").foregroundStyle(Color.brandNavy)
                                 .overlay(alignment: .topTrailing) {
                                     if cartViewModel.itemCount > 0 {
                                         Text("\(cartViewModel.itemCount)")
@@ -54,13 +54,13 @@ struct ProductListView: View {
                                 authViewModel.logout()
                             }
                         } label: {
-                            Image(systemName: "person.crop.circle")
+                            Image(systemName: "person.crop.circle").foregroundStyle(Color.brandNavy)
                         }
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         NavigationLink { CartView() } label: { /* your existing cart icon */
                         
-                            Image(systemName: "cart").tint(.black)
+                            Image(systemName: "cart").foregroundStyle(Color.brandNavy)
                                 .overlay(alignment: .topTrailing) {
                                     if cartViewModel.itemCount > 0 {
                                         Text("\(cartViewModel.itemCount)")
@@ -79,7 +79,7 @@ struct ProductListView: View {
                         NavigationLink {
                             OrderHistoryView()
                         } label: {
-                            Image(systemName: "clock.arrow.circlepath")
+                            Image(systemName: "clock.arrow.circlepath").foregroundStyle(Color.brandNavy)
                         }
                     }
                 }
@@ -95,14 +95,23 @@ struct ProductListView: View {
     }
     
     private var listOfProdcutsView: some View {
+        
+        
         List {
             ForEach(viewModel.products) { product in
                 NavigationLink(value: product.id) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(product.title).font(.headline)
-                        Text("$\(product.price, specifier: "%.2f")")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                    HStack(spacing: AppSpacing.md) {
+                        RemoteImage(urlString: product.thumbnail)
+                            .frame(width: 56, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: AppRadius.sm, style: .continuous))
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(product.title)
+                                .font(AppFont.headline)
+                                .foregroundStyle(Color.brandNavy)
+                                .lineLimit(2)
+                            PriceText(amount: product.price, font: AppFont.subheadline, color: Color.brandSecondary)
+                        }
                     }
                 }
                 .task {

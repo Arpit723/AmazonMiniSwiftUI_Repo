@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// Username + password login. DummyJSON authenticates by username (not email),
+// Branded username + password login. DummyJSON authenticates by username (not email),
 // so this screen asks for a username and surfaces the seeded demo credentials.
 struct LoginView: View {
     @Environment(AuthViewModel.self) private var authViewModel
@@ -18,48 +18,66 @@ struct LoginView: View {
     var onSwitchToSignup: () -> Void
 
     var body: some View {
-        Form {
-            Section {
-                TextField("Username", text: $username)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                SecureField("Password", text: $password)
-            }
+        ScrollView {
+            VStack(spacing: 24) {
+                AuthHeaderView(subtitle: "Sign in to continue shopping")
 
-            if let error = authViewModel.error {
-                Section {
-                    Text(error)
-                        .foregroundStyle(.red)
-                        .font(.footnote)
-                }
-            }
+                VStack(spacing: 16) {
+                    AuthInputField(
+                        title: "Username",
+                        text: $username,
+                        textContentType: .username,
+                        autocapitalization: .never,
+                        autocorrection: false,
+                        leadingIcon: "person"
+                    )
 
-            Section {
-                Button {
-                    Task {
-                        await authViewModel.login(username: username, password: password)
+                    AuthInputField(
+                        title: "Password",
+                        text: $password,
+                        isSecure: true,
+                        textContentType: .password,
+                        autocapitalization: .never,
+                        autocorrection: false,
+                        leadingIcon: "lock"
+                    )
+
+                    if let error = authViewModel.error {
+                        Text(error)
+                            .font(.footnote)
+                            .foregroundStyle(Color.errorRed)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text(authViewModel.isLoading ? "Signing in…" : "Login").bold()
-                        Spacer()
+
+                    PrimaryButton(
+                        title: authViewModel.isLoading ? "Signing in…" : "Login",
+                        isLoading: authViewModel.isLoading,
+                        isEnabled: !username.isEmpty && !password.isEmpty
+                    ) {
+                        Task {
+                            await authViewModel.login(username: username, password: password)
+                        }
                     }
                 }
-                .disabled(username.isEmpty || password.isEmpty || authViewModel.isLoading)
-            }
 
-            Section {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(spacing: 6) {
                     Text("New here?")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.brandSecondary)
                     Button("Create an account") { onSwitchToSignup() }
-                        .font(.footnote)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.brandNavy)
                 }
+
                 Text("Demo credentials:  emilys / emilyspass")
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.brandSecondary)
+                    .multilineTextAlignment(.center)
             }
+            .padding(24)
         }
+        .scrollDismissesKeyboard(.interactively)
+        .background(Color.white)
     }
 }
 

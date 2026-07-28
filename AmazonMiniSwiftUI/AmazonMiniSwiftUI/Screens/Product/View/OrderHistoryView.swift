@@ -15,18 +15,25 @@ struct OrderHistoryView: View {
         NavigationStack {
             Group {
                 if let error = viewModel.error {
-                    Text("Error: \(error)").foregroundStyle(.red)
+                    Text("Error: \(error)").foregroundStyle(Color.errorRed)
                 } else if viewModel.orders.isEmpty {
                     ContentUnavailableView("No Orders Yet", systemImage: "bag")
                 } else {
                     List(viewModel.orders) { order in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Order #\(order.transactionId.prefix(8))").font(.headline)
+                        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                            Text("Order #\(order.transactionId.prefix(8))")
+                                .font(AppFont.headline)
+                                .foregroundStyle(Color.brandNavy)
                             Text(order.date, format: .dateTime.day().month().year().hour().minute())
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text("$\(order.subtotal, specifier: "%.2f")  ·  \(order.items.count) item(s)")
-                                .font(.subheadline)
+                                .font(AppFont.caption)
+                                .foregroundStyle(Color.brandSecondary)
+                            HStack(spacing: AppSpacing.xs) {
+                                PriceText(amount: order.subtotal, font: AppFont.subheadline, color: Color.brandText)
+                                Text("·").foregroundStyle(Color.brandSecondary)
+                                Text("\(order.items.count) item(s)")
+                                    .font(AppFont.subheadline)
+                                    .foregroundStyle(Color.brandSecondary)
+                            }
                         }
                     }
                 }

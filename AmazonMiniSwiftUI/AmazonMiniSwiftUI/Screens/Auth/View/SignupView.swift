@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// Registration form. Validates inline (on first submit) and, on success, the
+// Branded registration form. Validates inline (on first submit) and, on success, the
 // AuthViewModel auto-logs the new user in (RootView flips to the main app).
 struct SignupView: View {
     @Environment(AuthViewModel.self) private var authViewModel
@@ -18,112 +18,137 @@ struct SignupView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var gender = "Male"
-    @State private var birthDate = twentyYearsAgo
+    @State private var birthDate = Self.twentyYearsAgo
     @State private var attemptedSubmit = false
 
     private let genderOptions = ["Male", "Female"]
     var onSwitchToLogin: () -> Void
 
     var body: some View {
-        Form {
-            Section("Account") {
-                TextField("Username (min 3 chars)", text: $username)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                fieldError(
-                    "Username must be at least 3 characters.",
-                    show: attemptedSubmit && !AuthValidator.isValidUsername(username)
-                )
+        ScrollView {
+            VStack(spacing: 24) {
+                AuthHeaderView(subtitle: "Create your free account")
 
-                TextField("Email", text: $email)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                fieldError(
-                    "Enter a valid email address.",
-                    show: attemptedSubmit && !AuthValidator.isValidEmail(email)
-                )
-            }
+                VStack(spacing: 16) {
+                    AuthInputField(
+                        title: "Full Name",
+                        text: $fullName,
+                        textContentType: .name,
+                        autocapitalization: .words,
+                        leadingIcon: "person",
+                        errorMessage: attemptedSubmit && !AuthValidator.isValidFullName(fullName)
+                            ? "Full name is required." : nil
+                    )
 
-            Section("Profile") {
-                TextField("Full Name", text: $fullName)
-                fieldError(
-                    "Full name is required.",
-                    show: attemptedSubmit && !AuthValidator.isValidFullName(fullName)
-                )
+                    AuthInputField(
+                        title: "Username",
+                        text: $username,
+                        textContentType: .username,
+                        autocapitalization: .never,
+                        autocorrection: false,
+                        leadingIcon: "at",
+                        errorMessage: attemptedSubmit && !AuthValidator.isValidUsername(username)
+                            ? "Username must be at least 3 characters." : nil
+                    )
 
-                Picker("Gender", selection: $gender) {
-                    ForEach(genderOptions, id: \.self) { Text($0).tag($0) }
-                }
+                    AuthInputField(
+                        title: "Email",
+                        text: $email,
+                        keyboardType: .emailAddress,
+                        textContentType: .emailAddress,
+                        autocapitalization: .never,
+                        autocorrection: false,
+                        leadingIcon: "envelope",
+                        errorMessage: attemptedSubmit && !AuthValidator.isValidEmail(email)
+                            ? "Enter a valid email address." : nil
+                    )
 
-                DatePicker("Birth Date", selection: $birthDate, in: ...Date(), displayedComponents: .date)
-            }
+                    AuthInputField(
+                        title: "Password",
+                        text: $password,
+                        isSecure: true,
+                        textContentType: .newPassword,
+                        autocapitalization: .never,
+                        autocorrection: false,
+                        leadingIcon: "lock",
+                        errorMessage: attemptedSubmit && !AuthValidator.isValidPassword(password)
+                            ? "Min 8 chars, with 1 uppercase, 1 lowercase, and 1 number." : nil
+                    )
 
-            Section("Security") {
-                SecureField("Password", text: $password)
-                fieldError(
-                    "Min 8 chars, with 1 uppercase, 1 lowercase, and 1 number.",
-                    show: attemptedSubmit && !AuthValidator.isValidPassword(password)
-                )
+                    AuthInputField(
+                        title: "Confirm Password",
+                        text: $confirmPassword,
+                        isSecure: true,
+                        textContentType: .newPassword,
+                        autocapitalization: .never,
+                        autocorrection: false,
+                        leadingIcon: "lock",
+                        errorMessage: attemptedSubmit && confirmPassword != password
+                            ? "Passwords do not match." : nil
+                    )
 
-                SecureField("Confirm Password", text: $confirmPassword)
-                fieldError(
-                    "Passwords do not match.",
-                    show: attemptedSubmit && confirmPassword != password
-                )
-            }
+                    genderRow
+                    birthDateRow
 
-            if let error = authViewModel.error {
-                Section {
-                    Text(error)
-                        .foregroundStyle(.red)
-                        .font(.footnote)
-                }
-            }
+                    if let error = authViewModel.error {
+                        Text(error)
+                            .font(.footnote)
+                            .foregroundStyle(Color.errorRed)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
 
-            Section {
-                Button {
-                    submit()
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text(authViewModel.isLoading ? "Creating…" : "Sign Up").bold()
-                        Spacer()
+                    PrimaryButton(
+                        title: authViewModel.isLoading ? "Creating…" : "Sign Up",
+                        isLoading: authViewModel.isLoading,
+                        isEnabled: true
+                    ) {
+                        submit()
                     }
                 }
-                .disabled(authViewModel.isLoading)
-            }
 
-            Section {
                 HStack {
                     Text("Already have an account?")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.brandSecondary)
                     Spacer()
                     Button("Log in") { onSwitchToLogin() }
-                        .font(.footnote)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.brandNavy)
                 }
             }
+            .padding(24)
         }
+        .scrollDismissesKeyboard(.interactively)
+        .background(Color.white)
     }
 
-    // MARK: - Private
+    // MARK: - Styled controls
 
-    private func fieldError(_ text: String, show: Bool) -> some View {
-        Group {
-            if show {
-                Text(text)
-                    .font(.caption)
-                    .foregroundStyle(.red)
+    private var genderRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Gender")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.brandNavy)
+            Picker("Gender", selection: $gender) {
+                ForEach(genderOptions, id: \.self) { Text($0).tag($0) }
             }
+            .pickerStyle(.segmented)
         }
     }
 
-    private var isFormValid: Bool {
-        AuthValidator.isValidUsername(username) &&
-        AuthValidator.isValidEmail(email) &&
-        AuthValidator.isValidFullName(fullName) &&
-        AuthValidator.isValidPassword(password) &&
-        confirmPassword == password &&
-        AuthValidator.isValidBirthDate(birthDate)
+    private var birthDateRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Birth Date")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.brandNavy)
+            DatePicker("", selection: $birthDate, in: ...Date(), displayedComponents: .date)
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
+
+    // MARK: - Submit
 
     private func submit() {
         attemptedSubmit = true
@@ -139,6 +164,15 @@ struct SignupView: View {
                 birthDate: birthDate
             )
         }
+    }
+
+    private var isFormValid: Bool {
+        AuthValidator.isValidUsername(username) &&
+        AuthValidator.isValidEmail(email) &&
+        AuthValidator.isValidFullName(fullName) &&
+        AuthValidator.isValidPassword(password) &&
+        confirmPassword == password &&
+        AuthValidator.isValidBirthDate(birthDate)
     }
 
     private static var twentyYearsAgo: Date {

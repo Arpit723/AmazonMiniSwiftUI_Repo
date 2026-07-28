@@ -16,17 +16,16 @@ struct CartRowView: View {
     var onDelete: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: AppSpacing.md) {
             thumbnail
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
                 Text(item.title)
-                    .font(.headline)
+                    .font(AppFont.headline)
+                    .foregroundStyle(Color.brandNavy)
                     .lineLimit(2)
 
-                Text("$\(item.price, specifier: "%.2f")")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                PriceText(amount: item.price, font: AppFont.subheadline, color: Color.brandSecondary)
 
                 Stepper(value: Binding(
                     get: { item.quantity },
@@ -35,22 +34,16 @@ struct CartRowView: View {
                     Text("Qty: \(item.quantity)")
                 }
 
-                Text("$\(item.price * Double(item.quantity), specifier: "%.2f")")
-                    .font(.headline)
+                PriceText(amount: item.price * Double(item.quantity), font: AppFont.headline, color: Color.brandNavy)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, AppSpacing.xs)
     }
 
-    // Same AsyncImage pattern used in ProductListView / ProductDetailView.
     private var thumbnail: some View {
-        AsyncImage(url: URL(string: item.thumbnail)) { image in
-            image.resizable().scaledToFit()
-        } placeholder: {
-            ProgressView()
-        }
-        .frame(width: 64, height: 64)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        RemoteImage(urlString: item.thumbnail)
+            .frame(width: 64, height: 64)
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.sm, style: .continuous))
     }
 }
 

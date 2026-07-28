@@ -7,8 +7,9 @@
 
 import SwiftUI
 
-// Container for the unauthenticated experience: swaps between Login and Signup
-// within its own NavigationStack. Shown by RootView when not logged in.
+// Container for the unauthenticated experience: swaps between Login and Signup within
+// its own NavigationStack, with the nav bar hidden (the logo is the header) and a
+// subtle cross-fade between the two screens. Shown by RootView when not logged in.
 struct AuthFlowView: View {
     @State private var mode: AuthMode = .login
 
@@ -17,13 +18,17 @@ struct AuthFlowView: View {
             Group {
                 switch mode {
                 case .login:
-                    LoginView(onSwitchToSignup: { withAnimation { mode = .signup } })
+                    LoginView(onSwitchToSignup: { withAnimation(.easeInOut) { mode = .signup } })
+                        .transition(.opacity)
                 case .signup:
-                    SignupView(onSwitchToLogin: { withAnimation { mode = .login } })
+                    SignupView(onSwitchToLogin: { withAnimation(.easeInOut) { mode = .login } })
+                        .transition(.opacity)
                 }
             }
-            .navigationTitle(mode == .login ? "Login" : "Sign Up")
-            .navigationBarTitleDisplayMode(.inline)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.white.ignoresSafeArea())
+            .animation(.easeInOut, value: mode)
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 }
