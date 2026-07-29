@@ -45,6 +45,15 @@ final class AuthService: Sendable {
         return try JSONDecoder().decode(User.self, from: data)
     }
 
+    // DELETE /users/{id} — best-effort account removal. DummyJSON returns the deleted
+    // user (or 404 for ids it never persisted). Response body is intentionally ignored.
+    func deleteUser(id: Int) async throws {
+        var request = URLRequest(url: baseURL.appending(path: "users/\(id)"))
+        request.httpMethod = "DELETE"
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response, data: data)
+    }
+
     // MARK: - Private helpers
 
     private func send(_ path: String, method: String, body: some Encodable) async throws -> User {
