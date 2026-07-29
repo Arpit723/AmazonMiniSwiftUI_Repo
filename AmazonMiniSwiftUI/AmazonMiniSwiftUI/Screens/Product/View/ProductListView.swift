@@ -49,10 +49,8 @@ struct ProductListView: View {
              */
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Menu {
-                            Button("Logout", role: .destructive) {
-                                authViewModel.logout()
-                            }
+                        NavigationLink {
+                            SettingsView()
                         } label: {
                             Image(systemName: "person.crop.circle").foregroundStyle(Color.brandNavy)
                         }
