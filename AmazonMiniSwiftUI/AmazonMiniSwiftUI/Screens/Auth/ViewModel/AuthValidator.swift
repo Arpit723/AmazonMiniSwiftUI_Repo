@@ -50,4 +50,13 @@ enum AuthValidator {
         formatter.dateFormat = "yyyy-M-d"
         return formatter.string(from: date)
     }
+
+    // Inverse of formatDate: parses DummyJSON's "yyyy-M-d" string (e.g. "1996-5-30")
+    // back into a Date. Returns nil for nil/empty/invalid input.
+    static func parseBirthDate(_ string: String?) -> Date? {
+        guard let string, !string.isEmpty else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-M-d"
+        return formatter.date(from: string)
+    }
 }
