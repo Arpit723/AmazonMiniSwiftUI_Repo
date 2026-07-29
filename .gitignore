@@ -61,6 +61,6 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# Local agent planning/spec docs (not part of the app source)
+# Local agent tooling/planning data (Kilo) — not part of the app source
 docs/superpowers/
-.kilo/plans/
+.kilo/

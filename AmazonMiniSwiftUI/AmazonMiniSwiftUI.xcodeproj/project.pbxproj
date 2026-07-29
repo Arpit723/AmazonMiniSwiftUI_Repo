@@ -32,7 +32,7 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E44AEB662FEBF2DF00871791 /* AmazonMiniSwiftUI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-		path = AmazonMiniSwiftUI;
+			path = AmazonMiniSwiftUI;
 			sourceTree = "<group>";
 		};
 		E44AEB762FEBF2E000871791 /* AmazonMiniSwiftUITests */ = {
