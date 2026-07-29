@@ -173,11 +173,12 @@ final class AuthViewModel {
     func deleteAccount() async {
         guard let user = currentUser else { return }
         isLoading = true
+        defer { isLoading = false }
+        error = nil
         _ = try? await service.deleteUser(id: user.id)
         removeRegisteredUser(username: user.username)
         KeychainStore.delete(for: KeychainStore.Key.currentUser)
         currentUser = nil
-        isLoading = false
     }
 
     private func removeRegisteredUser(username: String) {
