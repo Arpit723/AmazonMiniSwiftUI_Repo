@@ -130,6 +130,34 @@ final class AuthViewModel {
         }
     }
 
+    // MARK: Profile update
+
+    // Updates the current user's editable fields and persists to Keychain. For locally
+    // registered accounts the registeredUsers entry is also refreshed so the change
+    // survives logout/re-login. DummyJSON does not persist this server-side.
+    func updateProfile(firstName: String, lastName: String, gender: String, birthDate: String) {
+        guard currentUser != nil else { return }
+        currentUser?.firstName = firstName.trimmingCharacters(in: .whitespaces)
+        currentUser?.lastName = lastName.trimmingCharacters(in: .whitespaces)
+        currentUser?.gender = gender.lowercased()
+        currentUser?.birthDate = birthDate
+        persistCurrentUser()
+        refreshRegisteredUserIfPresent()
+    }
+
+    // Re-writes the local registeredUsers entry for the current user only if it already
+    // exists (so seeded DummyJSON accounts are never copied into local storage).
+    private func refreshRegisteredUserIfPresent() {
+        guard let user = currentUser else { return }
+        var registered = (try? KeychainStore.load([User].self, for: KeychainStore.Key.registeredUsers)) ?? []
+        guard registered.contains(where: { $0.username.caseInsensitiveCompare(user.username) == .orderedSame }) else {
+            return
+        }
+        registered.removeAll { $0.username.caseInsensitiveCompare(user.username) == .orderedSame }
+        registered.append(user)
+        try? KeychainStore.save(registered, for: KeychainStore.Key.registeredUsers)
+    }
+
     // MARK: Logout
 
     func logout() {
