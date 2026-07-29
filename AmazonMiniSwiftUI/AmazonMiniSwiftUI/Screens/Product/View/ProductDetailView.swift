@@ -4,7 +4,6 @@ import SwiftUI
 struct ProductDetailView: View {
     @StateObject private var viewModel = ProductDetailViewModel()
     @Environment(CartViewModel.self) private var cartViewModel
-    @State private var showAddedConfirmation = false
     let productId: Int
 
     var body: some View {
@@ -27,20 +26,6 @@ struct ProductDetailView: View {
         .task {
             await viewModel.loadProductDetail(productId: productId)
         }
-        .overlay(alignment: .top) {
-            if showAddedConfirmation {
-                Text("Added to Cart")
-                    .font(AppFont.footnote.weight(.semibold))
-                    .foregroundStyle(Color.brandNavy)
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.vertical, 10)
-                    .background(.regularMaterial, in: Capsule())
-                    .shadow(radius: 4)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .padding(.top, AppSpacing.sm)
-            }
-        }
-        .animation(.easeInOut, value: showAddedConfirmation)
     }
 
     private var imageGallery: some View {
@@ -73,23 +58,52 @@ struct ProductDetailView: View {
                 .font(AppFont.body)
                 .foregroundStyle(Color.brandText)
 
-            PrimaryButton(title: "Add to Cart") {
-                if let product = viewModel.productDetail {
-                    cartViewModel.addItem(product: product)
-                    showConfirmation()
-                }
-            }
+            addToCartSection
         }
         .padding()
     }
 
-    // Brief, self-dismissing "Added to Cart" banner — no new dependencies.
-    private func showConfirmation() {
-        withAnimation { showAddedConfirmation = true }
-        Task {
-            try? await Task.sleep(for: .seconds(1.5))
-            withAnimation { showAddedConfirmation = false }
+    // Stateful add/stepper control. "Add to Cart" while the product isn't in the cart;
+    // a − [qty] + stepper once it is. Decrementing at quantity 1 removes the item and
+    // reverts to the button. Reads cart state live via @Observable, so it reflects
+    // changes made anywhere in the app.
+    private var addToCartSection: some View {
+        let qty = viewModel.productDetail.map { cartViewModel.quantity(for: $0.id) } ?? 0
+        return Group {
+            if qty > 0, let product = viewModel.productDetail {
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    HStack {
+                        QuantityStepper(
+                            quantity: qty,
+                            onIncrement: { cartViewModel.updateQuantity(id: product.id, quantity: qty + 1) },
+                            onDecrement: {
+                                if qty <= 1 {
+                                    cartViewModel.removeItem(id: product.id)
+                                } else {
+                                    cartViewModel.updateQuantity(id: product.id, quantity: qty - 1)
+                                }
+                            }
+                        )
+                        Spacer()
+                        PriceText(amount: product.price * Double(qty), font: AppFont.headline, color: Color.brandNavy)
+                    }
+
+                    if qty > 1 {
+                        Text("Subtotal for \(qty) items")
+                            .font(AppFont.footnote)
+                            .foregroundStyle(Color.brandSecondary)
+                    }
+                }
+                .transition(.opacity)
+            } else {
+                PrimaryButton(title: "Add to Cart") {
+                    if let product = viewModel.productDetail {
+                        cartViewModel.addItem(product: product)
+                    }
+                }
+            }
         }
+        .animation(.easeInOut, value: qty)
     }
 }
 
