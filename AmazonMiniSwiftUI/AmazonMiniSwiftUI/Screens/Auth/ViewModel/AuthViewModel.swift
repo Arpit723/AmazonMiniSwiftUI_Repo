@@ -165,6 +165,31 @@ final class AuthViewModel {
         currentUser = nil
     }
 
+    // MARK: Delete account
+
+    // Permanently removes the current user: best-effort DELETE on the server (errors
+    // are swallowed, since locally-registered accounts were never persisted server-side
+    // and may 404), then prunes the local registeredUsers entry and clears the session.
+    func deleteAccount() async {
+        guard let user = currentUser else { return }
+        isLoading = true
+        _ = try? await service.deleteUser(id: user.id)
+        removeRegisteredUser(username: user.username)
+        KeychainStore.delete(for: KeychainStore.Key.currentUser)
+        currentUser = nil
+        isLoading = false
+    }
+
+    private func removeRegisteredUser(username: String) {
+        var registered = (try? KeychainStore.load([User].self, for: KeychainStore.Key.registeredUsers)) ?? []
+        registered.removeAll { $0.username.caseInsensitiveCompare(username) == .orderedSame }
+        if registered.isEmpty {
+            KeychainStore.delete(for: KeychainStore.Key.registeredUsers)
+        } else {
+            try? KeychainStore.save(registered, for: KeychainStore.Key.registeredUsers)
+        }
+    }
+
     // MARK: - Local credential store (Keychain)
 
     private func locallyRegisteredUser(username: String, password: String) -> User? {

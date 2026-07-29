@@ -17,6 +17,8 @@ final class AuthViewModelProfileTests: XCTestCase {
     override func tearDown() {
         KeychainStore.delete(for: KeychainStore.Key.currentUser)
         KeychainStore.delete(for: KeychainStore.Key.registeredUsers)
+        // Reset the mock so a handler set in one test can't leak into another.
+        MockURLProtocol.handler = nil
     }
 
     @MainActor
@@ -64,5 +66,49 @@ final class AuthViewModelProfileTests: XCTestCase {
 
         let registered = try KeychainStore.load([User].self, for: KeychainStore.Key.registeredUsers)
         XCTAssertNil(registered)
+    }
+
+    @MainActor
+    func testDeleteAccount_clearsSession() async throws {
+        MockURLProtocol.handler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, Data("{}".utf8))
+        }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let vm = AuthViewModel(service: AuthService(session: URLSession(configuration: config)))
+
+        let local = makeUser(username: "deleteme")
+        try KeychainStore.save([local], for: KeychainStore.Key.registeredUsers)
+        vm.currentUser = local
+
+        await vm.deleteAccount()
+
+        XCTAssertNil(vm.currentUser)
+        XCTAssertFalse(vm.isLoading)
+        XCTAssertNil(try KeychainStore.load(User.self, for: KeychainStore.Key.currentUser))
+        XCTAssertEqual((try KeychainStore.load([User].self, for: KeychainStore.Key.registeredUsers))?.count ?? 0, 0)
+    }
+
+    @MainActor
+    func testDeleteAccount_clearsLocalEvenWhenServer404() async throws {
+        MockURLProtocol.handler = { request in
+            let body = Data(#"{"message":"User not found"}"#.utf8)
+            let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+            return (response, body)
+        }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let vm = AuthViewModel(service: AuthService(session: URLSession(configuration: config)))
+
+        let local = makeUser(username: "deleteme")
+        try KeychainStore.save([local], for: KeychainStore.Key.registeredUsers)
+        vm.currentUser = local
+
+        await vm.deleteAccount()
+
+        XCTAssertNil(vm.currentUser)
+        XCTAssertNil(try KeychainStore.load(User.self, for: KeychainStore.Key.currentUser))
+        XCTAssertEqual((try KeychainStore.load([User].self, for: KeychainStore.Key.registeredUsers))?.count ?? 0, 0)
     }
 }
