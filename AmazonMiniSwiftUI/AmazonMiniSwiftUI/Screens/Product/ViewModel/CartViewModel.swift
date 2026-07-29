@@ -30,6 +30,12 @@ final class CartViewModel {
     var subtotal: Double { items.reduce(0) { $0 + $1.price * Double($1.quantity) } }
     var itemCount: Int { items.reduce(0) { $0 + $1.quantity } }
 
+    // Live quantity of a given product in the cart (0 when absent). Read by views
+    // (e.g. the product-detail CTA) to reflect cart state without duplicating lookups.
+    func quantity(for id: Int) -> Int {
+        items.first(where: { $0.id == id })?.quantity ?? 0
+    }
+
     // MARK: Dependencies / internals
 
     private let service: CartService
