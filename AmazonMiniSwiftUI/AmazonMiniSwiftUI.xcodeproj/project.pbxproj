@@ -29,33 +29,10 @@
 		E44AEB7D2FEBF2E000871791 /* AmazonMiniSwiftUIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AmazonMiniSwiftUIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E44AEBB82FEBFB2D00871791 /* Exceptions for "AmazonMiniSwiftUI" folder in "AmazonMiniSwiftUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Screens/Product/Model/ProductDetail.swift,
-				Screens/Product/View/ProductListView.swift,
-			);
-			target = E44AEB722FEBF2E000871791 /* AmazonMiniSwiftUITests */;
-		};
-		E44AEBB92FEBFB2D00871791 /* Exceptions for "AmazonMiniSwiftUI" folder in "AmazonMiniSwiftUIUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Screens/Product/Model/ProductDetail.swift,
-				Screens/Product/View/ProductListView.swift,
-			);
-			target = E44AEB7C2FEBF2E000871791 /* AmazonMiniSwiftUIUITests */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E44AEB662FEBF2DF00871791 /* AmazonMiniSwiftUI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				E44AEBB82FEBFB2D00871791 /* Exceptions for "AmazonMiniSwiftUI" folder in "AmazonMiniSwiftUITests" target */,
-				E44AEBB92FEBFB2D00871791 /* Exceptions for "AmazonMiniSwiftUI" folder in "AmazonMiniSwiftUIUITests" target */,
-			);
-			path = AmazonMiniSwiftUI;
+		path = AmazonMiniSwiftUI;
 			sourceTree = "<group>";
 		};
 		E44AEB762FEBF2E000871791 /* AmazonMiniSwiftUITests */ = {
