@@ -16,7 +16,7 @@ struct ProductListView: View {
                 } else {
                     listOfProdcutsView
                         .navigationDestination(for: Int.self) { productId in
-                            ProductDetailView(productId: productId)
+                            ProductDetailView(productId: productId).chevronOnlyBackButton()
                         }
                 }
             }.searchable(text: $viewModel.searchText)
@@ -50,13 +50,13 @@ struct ProductListView: View {
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         NavigationLink {
-                            SettingsView()
+                            SettingsView().chevronOnlyBackButton()
                         } label: {
                             Image(systemName: "person.crop.circle").foregroundStyle(Color.brandNavy)
                         }
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        NavigationLink { CartView() } label: { /* your existing cart icon */
+                        NavigationLink { CartView().chevronOnlyBackButton() } label: { /* your existing cart icon */
                         
                             Image(systemName: "cart").foregroundStyle(Color.brandNavy)
                                 .overlay(alignment: .topTrailing) {
@@ -75,7 +75,7 @@ struct ProductListView: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         NavigationLink {
-                            OrderHistoryView()
+                            OrderHistoryView().chevronOnlyBackButton()
                         } label: {
                             Image(systemName: "clock.arrow.circlepath").foregroundStyle(Color.brandNavy)
                         }

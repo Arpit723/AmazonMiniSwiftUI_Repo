@@ -23,13 +23,13 @@ struct SettingsView: View {
         List {
             Section {
                 NavigationLink {
-                    ProfileView()
+                    ProfileView().chevronOnlyBackButton()
                 } label: {
                     row(icon: "person.text.rectangle", title: "Update Profile", tint: Color.brandNavy)
                 }
 
                 NavigationLink {
-                    AboutView()
+                    AboutView().chevronOnlyBackButton()
                 } label: {
                     row(icon: "info.circle", title: "About App", tint: Color.brandNavy)
                 }
