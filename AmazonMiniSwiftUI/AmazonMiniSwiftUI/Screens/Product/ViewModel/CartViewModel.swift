@@ -87,18 +87,18 @@ final class CartViewModel {
 
     // MARK: Loading
 
-    func refresh() async {
-        isLoading = true
-        error = nil
-        do {
-            let cart = try await service.fetchCart(userId: userId)
-            items = cart.items
-            cartId = cart.id
-        } catch {
-            self.error = error.localizedDescription
-        }
-        isLoading = false
-    }
+//    func refresh() async {
+//        isLoading = true
+//        error = nil
+//        do {
+//            let cart = try await service.fetchCart(userId: userId)
+//            items = cart.items
+//            cartId = cart.id
+//        } catch {
+//            self.error = error.localizedDescription
+//        }
+//        isLoading = false
+//    }
 
     // MARK: Private
 

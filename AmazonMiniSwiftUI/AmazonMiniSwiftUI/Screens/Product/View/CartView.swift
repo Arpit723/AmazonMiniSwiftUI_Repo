@@ -84,9 +84,9 @@ struct CartView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .refreshable {
-            await cartViewModel.refresh()
-        }
+//        .refreshable {
+//            await cartViewModel.refresh()
+//        }
     }
 
     // Pinned below the List (it's outside the List, so it never scrolls away).

@@ -123,7 +123,7 @@ struct ProductListView: View {
                 ProgressView().frame(maxWidth: .infinity)
             }
         }.refreshable {
-            await viewModel.refresh()
+            await viewModel.pullToRefresh()
         }
 
         

@@ -26,15 +26,15 @@ final class CartService: Sendable {
         return try await send("carts/add", method: "POST", body: body)
     }
 
-    // GET /carts/user/{userId} — fetch the user's existing cart.
-    // If the user has no cart yet, returns an empty cart rather than throwing.
-    func fetchCart(userId: Int) async throws -> Cart {
-        let url = baseURL.appending(path: "carts/user/\(userId)")
-        let (data, response) = try await session.data(from: url)
-        try Self.validate(response)
-        let collection = try JSONDecoder().decode(CartCollection.self, from: data)
-        return collection.carts.first ?? Cart.empty(userId: userId)
-    }
+//    // GET /carts/user/{userId} — fetch the user's existing cart.
+//    // If the user has no cart yet, returns an empty cart rather than throwing.
+//    func fetchCart(userId: Int) async throws -> Cart {
+//        let url = baseURL.appending(path: "carts/user/\(userId)")
+//        let (data, response) = try await session.data(from: url)
+//        try Self.validate(response)
+//        let collection = try JSONDecoder().decode(CartCollection.self, from: data)
+//        return collection.carts.first ?? Cart.empty(userId: userId)
+//    }
 
     // PUT /carts/{id} — update quantities for an existing cart.
     func updateCart(cartId: Int, products: [(id: Int, quantity: Int)]) async throws -> Cart {
