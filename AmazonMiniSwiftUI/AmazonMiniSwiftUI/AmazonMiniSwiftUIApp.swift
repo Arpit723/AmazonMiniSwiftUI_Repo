@@ -6,26 +6,12 @@
 //
 
 import SwiftUI
-import SwiftData
 
 @main
 struct AmazonMiniSwiftUIApp: App {
     @State private var cartViewModel = CartViewModel()
     @State private var checkoutViewModel: CheckoutViewModel
     @State private var authViewModel = AuthViewModel()
-
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
 
     init() {
          let cart = CartViewModel()
@@ -40,6 +26,5 @@ struct AmazonMiniSwiftUIApp: App {
                 .environment(cartViewModel)
                 .environment(checkoutViewModel)
         }
-        .modelContainer(sharedModelContainer)
     }
 }
