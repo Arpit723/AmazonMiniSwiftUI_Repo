@@ -38,8 +38,9 @@ struct ProfileView: View {
                 header
 
                 VStack(spacing: 16) {
-                    AuthInputField(title: "First Name", text: $firstName, leadingIcon: "person")
-                    AuthInputField(title: "Last Name", text: $lastName, leadingIcon: "person")
+                AuthInputField(title: "First Name", text: $firstName, leadingIcon: "person",                      placeholder: "Enter your First Name"
+)
+                    AuthInputField(title: "Last Name", text: $lastName, leadingIcon: "person", placeholder: "Enter your Last Name")
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Gender")

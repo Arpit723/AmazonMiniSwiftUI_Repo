@@ -12,14 +12,16 @@ struct OrderHistoryView: View {
     @State private var viewModel = OrderHistoryViewModel()
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if let error = viewModel.error {
-                    Text("Error: \(error)").foregroundStyle(Color.errorRed)
-                } else if viewModel.orders.isEmpty {
-                    ContentUnavailableView("No Orders Yet", systemImage: "bag")
-                } else {
-                    List(viewModel.orders) { order in
+        Group {
+            if let error = viewModel.error {
+                Text("Error: \(error)").foregroundStyle(Color.errorRed)
+            } else if viewModel.orders.isEmpty {
+                ContentUnavailableView("No Orders Yet", systemImage: "bag")
+            } else {
+                List(viewModel.orders) { order in
+                    NavigationLink {
+                        OrderDetailView(order: order)
+                    } label: {
                         VStack(alignment: .leading, spacing: AppSpacing.xs) {
                             Text("Order #\(order.transactionId.prefix(8))")
                                 .font(AppFont.headline)
@@ -38,8 +40,8 @@ struct OrderHistoryView: View {
                     }
                 }
             }
-            .navigationTitle("Order History")
-            .task { await viewModel.load() }
         }
+        .navigationTitle("Order History")
+        .task { await viewModel.load() }
     }
 }

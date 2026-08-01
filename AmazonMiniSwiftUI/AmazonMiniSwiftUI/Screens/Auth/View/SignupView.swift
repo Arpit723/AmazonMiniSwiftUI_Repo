@@ -37,7 +37,9 @@ struct SignupView: View {
                         autocapitalization: .words,
                         leadingIcon: "person",
                         errorMessage: attemptedSubmit && !AuthValidator.isValidFullName(fullName)
-                            ? "Full name is required." : nil
+                            ? "Full name is required." : nil,
+                        placeholder: "Enter your full name"
+                        
                     )
 
                     AuthInputField(
@@ -48,7 +50,8 @@ struct SignupView: View {
                         autocorrection: false,
                         leadingIcon: "at",
                         errorMessage: attemptedSubmit && !AuthValidator.isValidUsername(username)
-                            ? "Username must be at least 3 characters." : nil
+                            ? "Username must be at least 3 characters." : nil,
+                        placeholder: "Choose a username"
                     )
 
                     AuthInputField(
@@ -60,7 +63,8 @@ struct SignupView: View {
                         autocorrection: false,
                         leadingIcon: "envelope",
                         errorMessage: attemptedSubmit && !AuthValidator.isValidEmail(email)
-                            ? "Enter a valid email address." : nil
+                            ? "Enter a valid email address." : nil,
+                        placeholder: "you@example.com"
                     )
 
                     AuthInputField(
@@ -72,7 +76,8 @@ struct SignupView: View {
                         autocorrection: false,
                         leadingIcon: "lock",
                         errorMessage: attemptedSubmit && !AuthValidator.isValidPassword(password)
-                            ? "Min 8 chars, with 1 uppercase, 1 lowercase, and 1 number." : nil
+                            ? "Min 8 chars, with 1 uppercase, 1 lowercase, and 1 number." : nil,
+                        placeholder: "Create a password"
                     )
 
                     AuthInputField(
@@ -84,7 +89,9 @@ struct SignupView: View {
                         autocorrection: false,
                         leadingIcon: "lock",
                         errorMessage: attemptedSubmit && confirmPassword != password
-                            ? "Passwords do not match." : nil
+                            ? "Passwords do not match." : nil,
+                        placeholder: "Re-enter your password"
+                        
                     )
 
                     genderRow

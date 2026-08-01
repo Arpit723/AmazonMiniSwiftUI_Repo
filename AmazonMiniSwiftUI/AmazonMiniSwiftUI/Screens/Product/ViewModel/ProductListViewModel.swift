@@ -18,7 +18,9 @@ final class ProductListViewModel: ObservableObject {
    
     init(service: ProductService = ProductService()) {
         self.service = service
-        observeSearchText()
+        Task {
+            await self.loadProducts()
+        }
     }
 
     
@@ -48,13 +50,14 @@ final class ProductListViewModel: ObservableObject {
     func pullToRefresh() async {
         //            let fetched =
         self.skipCount = 0
+        self.error = nil
 
         do {
             let fetched =
                 searchText.isEmpty
                 ? try await service.fetchProducts(
                     limit: limit,
-                    skip: self.skipCount
+                    skip: 0
                 ) : try await service.searchProducts(searchText: searchText)
             products = fetched
             error = nil
@@ -67,8 +70,9 @@ final class ProductListViewModel: ObservableObject {
     }
     
     func loadNextPage() async {
-        error = nil
         isLoadingNextPage = true
+        error = nil
+
 
         do {
             let products = try await service.fetchProducts(
@@ -76,6 +80,7 @@ final class ProductListViewModel: ObservableObject {
                     skip: products.count
                 )
             self.products.append(contentsOf: products)
+            self.error = nil
             self.isLoadingNextPage = false
             self.skipCount += self.limit
             self.canLoadMorePages = (products.count == self.limit)
@@ -102,6 +107,7 @@ final class ProductListViewModel: ObservableObject {
         self.canLoadMorePages = false
         do {
             self.products = try await service.searchProducts(searchText: query)
+            self.error = nil
         } catch {
             self.error = error.localizedDescription
         }
@@ -119,6 +125,7 @@ final class ProductListViewModel: ObservableObject {
 
     func searchProducts(searchText: String) async {
         self.isLoading = true
+        self.error = nil
         self.skipCount = 0
         self.canLoadMorePages = false
         do {
@@ -126,6 +133,7 @@ final class ProductListViewModel: ObservableObject {
                 searchText: searchText
             )
             self.isLoading = false
+            self.error = nil
         } catch {
             self.error = error.localizedDescription
         }

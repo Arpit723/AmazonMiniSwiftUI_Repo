@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Order: Codable, Identifiable, Sendable {
+struct Order: Codable, Identifiable, Hashable, Sendable {
     let id: UUID
     let items: [CartItem]
     let subtotal: Double

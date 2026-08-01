@@ -23,6 +23,7 @@ struct AuthInputField: View {
     var autocorrection: Bool = true
     var leadingIcon: String? = nil
     var errorMessage: String? = nil
+    var placeholder: String = ""
 
     @State private var showText = false
 
@@ -41,9 +42,9 @@ struct AuthInputField: View {
 
                 Group {
                     if isSecure && !showText {
-                        SecureField("", text: $text)
+                        SecureField(placeholder, text: $text)
                     } else {
-                        TextField("", text: $text)
+                        TextField(placeholder, text: $text)
                     }
                 }
                 .keyboardType(keyboardType)

@@ -29,7 +29,8 @@ struct LoginView: View {
                         textContentType: .username,
                         autocapitalization: .never,
                         autocorrection: false,
-                        leadingIcon: "person"
+                        leadingIcon: "person",
+                        placeholder: "Enter your username"
                     )
 
                     AuthInputField(
@@ -39,7 +40,8 @@ struct LoginView: View {
                         textContentType: .password,
                         autocapitalization: .never,
                         autocorrection: false,
-                        leadingIcon: "lock"
+                        leadingIcon: "lock",
+                        placeholder: "Enter your password"
                     )
 
                     if let error = authViewModel.error {
