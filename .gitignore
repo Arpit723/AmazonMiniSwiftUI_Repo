@@ -61,6 +61,8 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# Local agent tooling/planning data (Kilo) — not part of the app source
+# Local agent tooling/planning data (Kilo) — not part of the app source.
+# .kilo/rules/ is the exception: shared project conventions, tracked in git.
 docs/superpowers/
-.kilo/
+.kilo/*
+!.kilo/rules
