@@ -1,5 +1,5 @@
 //
-//  PaymnetService.swift
+//  PaymentService.swift
 //  AmazonMiniSwiftUI
 //
 //  Created by Arpit Parekh on 25/07/26.
