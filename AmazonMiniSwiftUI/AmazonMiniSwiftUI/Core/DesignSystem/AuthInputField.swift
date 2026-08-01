@@ -1,6 +1,11 @@
 //
-//  AuthComponents.swift
+//  AuthInputField.swift
 //  AmazonMiniSwiftUI
+//
+//  A labeled, rounded, icon-led text field shared across forms (Login, Signup,
+//  Profile). Supports secure (password) fields with a show/hide toggle and an
+//  optional inline error caption (red) shown under the field. Lives in the design
+//  system because it is reused beyond the Auth feature.
 //
 //  Created by Arpit Parekh on 27/07/26.
 //
@@ -8,44 +13,6 @@
 import SwiftUI
 import UIKit
 
-// MARK: - AuthHeaderView
-
-// Branded logo block reused at the top of Login and Signup: an orange rounded square
-// holding a bag icon, plus the "Amazon Mini" wordmark and a one-line subtitle.
-struct AuthHeaderView: View {
-    var subtitle: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.brandOrange)
-                    .frame(width: 72, height: 72)
-                    .shadow(color: Color.brandOrange.opacity(0.35), radius: 8, y: 4)
-                Image(systemName: "bag.fill")
-                    .font(.system(size: 34, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-
-            VStack(spacing: 4) {
-                Text("Amazon Mini")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(Color.brandNavy)
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.brandSecondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.bottom, 8)
-    }
-}
-
-// MARK: - AuthInputField
-
-// A labeled, rounded, icon-led text field. Supports secure (password) fields with a
-// show/hide toggle and an optional inline error caption (red) shown under the field.
 struct AuthInputField: View {
     var title: String
     @Binding var text: String
