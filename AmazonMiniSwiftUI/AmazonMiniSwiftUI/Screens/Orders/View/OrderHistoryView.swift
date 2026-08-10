@@ -20,7 +20,7 @@ struct OrderHistoryView: View {
             } else {
                 List(viewModel.orders) { order in
                     NavigationLink {
-                        OrderDetailView(order: order)
+                        OrderDetailView(order: order).chevronOnlyBackButton()
                     } label: {
                         VStack(alignment: .leading, spacing: AppSpacing.xs) {
                             Text("Order #\(order.transactionId.prefix(8))")

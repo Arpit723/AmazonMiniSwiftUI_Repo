@@ -139,44 +139,44 @@ final class ProductListViewModel: ObservableObject {
         }
     }
 
-    //    func loadProducts() async {
-    //        isLoading = true
-    //        error = nil
-    //        isLoadingNextPage = false
-    //        canLoadMorePages = true
-    //        await service.fetchProducts(limit: limit, skip: skipCount)
-    //            .sink( receiveCompletion: {  [weak self] completion in
-    //                self?.isLoading = false
-    //                if case .failure(let err) = completion {
-    //                    self?.error = err.localizedDescription
-    //                }
-    //            }, receiveValue: { [weak self] products in
-    //                self?.skipCount = 0
-    //                self?.products = products
-    //            }
-    //            )
-    //            .store(in: &cancellables)
-    //    }
+//        func loadProducts1() async {
+//            isLoading = true
+//            error = nil
+//            isLoadingNextPage = false
+//            canLoadMorePages = true
+//            await service.fetchProducts(limit: limit, skip: skipCount)
+//                .sink( receiveCompletion: {  [weak self] completion in
+//                    self?.isLoading = false
+//                    if case .failure(let err) = completion {
+//                        self?.error = err.localizedDescription
+//                    }
+//                }, receiveValue: { [weak self] products in
+//                    self?.skipCount = 0
+//                    self?.products = products
+//                }
+//                )
+//                .store(in: &cancellables)
+//        }
 
   
 
-    //    func loadNextPage() async {
-    //        error = nil
-    //        isLoadingNextPage = true
-    //
-    //        await service.fetchProducts(limit: limit, skip: skipCount)
-    //            .sink { [weak self] completion in
-    //                self?.isLoadingNextPage = false
-    //                if case .failure(let err) = completion {
-    //                    self?.error = err.localizedDescription
-    //                }
-    //            } receiveValue: { [weak self] products in
-    //                    self?.products.append(contentsOf:  products)
-    //                    self?.skipCount += (self?.limit ?? 0)
-    //                    self?.canLoadMorePages = (products.count == self?.limit)
-    //            }
-    //            .store(in: &cancellables)
-    //    }
+//        func loadNextPage1() async {
+//            error = nil
+//            isLoadingNextPage = true
+//    
+//            await service.fetchProducts(limit: limit, skip: skipCount)
+//                .sink { [weak self] completion in
+//                    self?.isLoadingNextPage = false
+//                    if case .failure(let err) = completion {
+//                        self?.error = err.localizedDescription
+//                    }
+//                } receiveValue: { [weak self] products in
+//                        self?.products.append(contentsOf:  products)
+//                        self?.skipCount += (self?.limit ?? 0)
+//                        self?.canLoadMorePages = (products.count == self?.limit)
+//                }
+//                .store(in: &cancellables)
+//        }
 
 
 
