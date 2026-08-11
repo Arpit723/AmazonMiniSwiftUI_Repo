@@ -25,7 +25,7 @@ struct CartRowView: View {
                     .foregroundStyle(Color.brandNavy)
                     .lineLimit(2)
 
-                PriceText(amount: item.price, font: AppFont.subheadline, color: Color.brandSecondary)
+                DiscountPriceView(price: item.price, discountPercentage: item.discountPercentage, font: AppFont.subheadline, color: Color.brandSecondary)
 
                 Stepper(value: Binding(
                     get: { item.quantity },
@@ -34,7 +34,7 @@ struct CartRowView: View {
                     Text("Qty: \(item.quantity)")
                 }
 
-                PriceText(amount: item.price * Double(item.quantity), font: AppFont.headline, color: Color.brandNavy)
+                DiscountPriceView(price: item.price * Double(item.quantity), discountPercentage: item.discountPercentage, font: AppFont.headline, color: Color.brandNavy, showBadge: false)
             }
         }
         .padding(.vertical, AppSpacing.xs)

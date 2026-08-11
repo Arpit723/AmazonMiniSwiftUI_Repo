@@ -108,7 +108,7 @@ struct ProductListView: View {
                                 .font(AppFont.headline)
                                 .foregroundStyle(Color.brandNavy)
                                 .lineLimit(2)
-                            PriceText(amount: product.price, font: AppFont.subheadline, color: Color.brandSecondary)
+                            DiscountPriceView(price: product.price, discountPercentage: product.discountPercentage, font: AppFont.subheadline, color: Color.brandSecondary)
                         }
                     }
                 }

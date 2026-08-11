@@ -52,7 +52,7 @@ struct ProductDetailView: View {
                 .font(AppFont.subheadline)
                 .foregroundStyle(Color.brandSecondary)
 
-            PriceText(amount: viewModel.productDetail?.price ?? 0, font: AppFont.headline, color: Color.brandNavy)
+            DiscountPriceView(price: viewModel.productDetail?.price ?? 0, discountPercentage: viewModel.productDetail?.discountPercentage ?? 0, font: AppFont.headline, color: Color.brandNavy)
 
             Text(viewModel.productDetail?.description ?? "")
                 .font(AppFont.body)
@@ -85,7 +85,7 @@ struct ProductDetailView: View {
                             }
                         )
                         Spacer()
-                        PriceText(amount: product.price * Double(qty), font: AppFont.headline, color: Color.brandNavy)
+                        DiscountPriceView(price: product.price * Double(qty), discountPercentage: product.discountPercentage, font: AppFont.headline, color: Color.brandNavy)
                     }
 
                     if qty > 1 {
