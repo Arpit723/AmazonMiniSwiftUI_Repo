@@ -2,9 +2,14 @@ import SwiftUI
 
 
 struct ProductDetailView: View {
-    @StateObject private var viewModel = ProductDetailViewModel()
+    @StateObject private var viewModel: ProductDetailViewModel
     @Environment(CartViewModel.self) private var cartViewModel
     let productId: Int
+
+    init(productId: Int, viewModel: ProductDetailViewModel = ProductDetailViewModel()) {
+        self.productId = productId
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
 
     var body: some View {
         Group {
@@ -24,6 +29,7 @@ struct ProductDetailView: View {
         .navigationTitle(viewModel.productDetail?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .task {
+            guard viewModel.productDetail == nil else { return }
             await viewModel.loadProductDetail(productId: productId)
         }
     }
@@ -54,11 +60,27 @@ struct ProductDetailView: View {
 
             DiscountPriceView(price: viewModel.productDetail?.price ?? 0, discountPercentage: viewModel.productDetail?.discountPercentage ?? 0, font: AppFont.headline, color: Color.brandNavy)
 
+            if let detail = viewModel.productDetail {
+                HStack(spacing: AppSpacing.xs) {
+                    StarRatingView(rating: detail.rating, size: 13)
+                    Text(String(format: "%.1f", detail.rating))
+                        .font(AppFont.footnote)
+                        .foregroundStyle(Color.brandSecondary)
+                    Text("(\(detail.reviews.count) review\(detail.reviews.count == 1 ? "" : "s"))")
+                        .font(AppFont.footnote)
+                        .foregroundStyle(Color.brandSecondary)
+                }
+            }
+
+            PriceText(amount: viewModel.productDetail?.price ?? 0, font: AppFont.headline, color: Color.brandNavy)
+
             Text(viewModel.productDetail?.description ?? "")
                 .font(AppFont.body)
                 .foregroundStyle(Color.brandText)
 
             addToCartSection
+
+            reviewsSection
         }
         .padding()
     }
@@ -105,11 +127,52 @@ struct ProductDetailView: View {
         }
         .animation(.easeInOut, value: qty)
     }
+
+    private var reviewsSection: some View {
+        let reviews = viewModel.productDetail?.reviews ?? []
+        return Group {
+            if !reviews.isEmpty {
+                DisclosureGroup("Reviews (\(reviews.count))") {
+                    VStack(alignment: .leading, spacing: AppSpacing.md) {
+                        ForEach(reviews, id: \.reviewerEmail) { review in
+                            VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                                HStack {
+                                    Text(review.reviewerName)
+                                        .font(AppFont.subheadline)
+                                        .foregroundStyle(Color.brandNavy).bold().fontWeight(.bold)
+                                    Spacer()
+                                    StarRatingView(rating: Double(review.rating), size: 12)
+                                }
+                                Text(review.comment)
+                                    .font(AppFont.body)
+                                    .foregroundStyle(Color.brandText)
+                                if let date = review.parsedDate {
+                                    Text(date.formatted(date: .abbreviated, time: .omitted))
+                                        .font(AppFont.caption)
+                                        .foregroundStyle(Color.brandSecondary)
+                                }
+                            }
+                            if review.reviewerEmail != reviews.last?.reviewerEmail {
+                                Divider().overlay(Color.black).frame(height: 1.0)
+                            }
+                        }
+                    }
+                    .padding(.top, AppSpacing.sm)
+                }
+                .font(AppFont.headline)
+                .foregroundStyle(Color.brandNavy)
+                .tint(Color.brandOrange)
+            }
+        }
+    }
 }
 
 #Preview {
-    NavigationStack {
-        ProductDetailView(productId: 0)
+    let viewModel = ProductDetailViewModel()
+    viewModel.productDetail = .mock
+
+    return NavigationStack {
+        ProductDetailView(productId: ProductDetail.mock.id, viewModel: viewModel)
             .environment(CartViewModel())
     }
 }
