@@ -60,6 +60,8 @@ struct ProductDetailView: View {
 
             DiscountPriceView(price: viewModel.productDetail?.price ?? 0, discountPercentage: viewModel.productDetail?.discountPercentage ?? 0, font: AppFont.headline, color: Color.brandNavy)
 
+            brandTagsSection
+
             if let detail = viewModel.productDetail {
                 HStack(spacing: AppSpacing.xs) {
                     StarRatingView(rating: detail.rating, size: 13)
@@ -72,7 +74,9 @@ struct ProductDetailView: View {
                 }
             }
 
-            PriceText(amount: viewModel.productDetail?.price ?? 0, font: AppFont.headline, color: Color.brandNavy)
+//            PriceText(amount: viewModel.productDetail?.price ?? 0, font: AppFont.headline, color: Color.brandNavy)
+
+            stockBadge
 
             Text(viewModel.productDetail?.description ?? "")
                 .font(AppFont.body)
@@ -83,6 +87,47 @@ struct ProductDetailView: View {
             reviewsSection
         }
         .padding()
+    }
+
+    private var brandTagsSection: some View {
+        let detail = viewModel.productDetail
+        return VStack(alignment: .leading, spacing: AppSpacing.xs) {
+            if let brand = detail?.brand, !brand.isEmpty {
+                HStack(spacing: AppSpacing.xs) {
+                    Text("Brand:")
+                        .font(AppFont.footnote)
+                        .foregroundStyle(Color.brandSecondary)
+                    Text(brand)
+                        .font(AppFont.footnote)
+                        .foregroundStyle(Color.brandNavy)
+                }
+            }
+
+            if let tags = detail?.tags, !tags.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: AppSpacing.xs) {
+                        ForEach(tags, id: \.self) { tag in
+                            TagChip(text: tag)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var stockBadge: some View {
+        let stock = viewModel.productDetail?.stock ?? 0
+        return Group {
+            if stock == 0 {
+                Text("Out of Stock")
+                    .font(AppFont.footnote)
+                    .foregroundStyle(Color.errorRed)
+            } else if stock <= 5 {
+                Text("Only \(stock) left")
+                    .font(AppFont.footnote)
+                    .foregroundStyle(Color.brandOrange)
+            }
+        }
     }
 
     // Stateful add/stepper control. "Add to Cart" while the product isn't in the cart;
@@ -118,7 +163,11 @@ struct ProductDetailView: View {
                 }
                 .transition(.opacity)
             } else {
-                PrimaryButton(title: "Add to Cart") {
+                let stock = viewModel.productDetail?.stock ?? 0
+                PrimaryButton(
+                    title: stock > 0 ? "Add to Cart" : "Out of Stock",
+                    isEnabled: stock > 0
+                ) {
                     if let product = viewModel.productDetail {
                         cartViewModel.addItem(product: product)
                     }
