@@ -85,6 +85,8 @@ struct ProductDetailView: View {
             addToCartSection
 
             reviewsSection
+
+            shippingReturnsSection
         }
         .padding()
     }
@@ -212,6 +214,38 @@ struct ProductDetailView: View {
                 .foregroundStyle(Color.brandNavy)
                 .tint(Color.brandOrange)
             }
+        }
+    }
+
+    // Second accordion in this file — see reviewsSection above for the matching
+    // pattern. Not extracted into a shared component yet; revisit if a third
+    // accordion shows up and the shared shape becomes clearer.
+    private var shippingReturnsSection: some View {
+        return Group {
+            if let detail = viewModel.productDetail {
+                DisclosureGroup("Shipping, Returns & Warranty") {
+                    VStack(alignment: .leading, spacing: AppSpacing.md) {
+                        accordionRow(label: "Shipping", value: detail.shippingInformation)
+                        accordionRow(label: "Returns", value: detail.returnPolicy)
+                        accordionRow(label: "Warranty", value: detail.warrantyInformation)
+                    }
+                    .padding(.top, AppSpacing.sm)
+                }
+                .font(AppFont.headline)
+                .foregroundStyle(Color.brandNavy)
+                .tint(Color.brandOrange)
+            }
+        }
+    }
+
+    private func accordionRow(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+            Text(label)
+                .font(AppFont.footnote)
+                .foregroundStyle(Color.brandSecondary)
+            Text(value)
+                .font(AppFont.body)
+                .foregroundStyle(Color.brandText)
         }
     }
 }
