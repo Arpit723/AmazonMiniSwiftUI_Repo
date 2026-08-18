@@ -8,12 +8,14 @@ final class ProductListViewModel: ObservableObject {
     @Published var isLoadingNextPage = false
     @Published var searchText: String = ""
     @Published var canLoadMorePages = true
+    @Published var sortOption: SortOption = .relevance
     private var skipCount: Int = 0
     private var limit: Int = 25
 
     private let service: ProductService
 
     private var searchTask: Task<Void, Never>?
+    private var sortTask: Task<Void, Never>?
 
    
     init(service: ProductService = ProductService()) {
@@ -34,7 +36,9 @@ final class ProductListViewModel: ObservableObject {
             do {
                 self.products = try await service.fetchProducts(
                     limit: self.limit,
-                    skip: self.skipCount
+                    skip: self.skipCount,
+                    sortBy: sortOption.sortBy,
+                    order: sortOption.order
                 )
                 self.isLoading = false
             } catch {
@@ -42,6 +46,15 @@ final class ProductListViewModel: ObservableObject {
             }
         } else {
             await self.performSearch(query: searchText)
+        }
+    }
+
+    func selectSort(_ option: SortOption) {
+        guard sortOption != option else { return }
+        sortOption = option
+        sortTask?.cancel()
+        sortTask = Task {
+            await loadProducts()
         }
     }
     
@@ -57,7 +70,9 @@ final class ProductListViewModel: ObservableObject {
                 searchText.isEmpty
                 ? try await service.fetchProducts(
                     limit: limit,
-                    skip: 0
+                    skip: 0,
+                    sortBy: sortOption.sortBy,
+                    order: sortOption.order
                 ) : try await service.searchProducts(searchText: searchText)
             products = fetched
             error = nil
@@ -77,7 +92,9 @@ final class ProductListViewModel: ObservableObject {
         do {
             let products = try await service.fetchProducts(
                     limit: limit,
-                    skip: products.count
+                    skip: products.count,
+                    sortBy: sortOption.sortBy,
+                    order: sortOption.order
                 )
             self.products.append(contentsOf: products)
             self.error = nil

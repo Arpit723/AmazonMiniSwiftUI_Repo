@@ -7,9 +7,13 @@ actor ProductService {
         self.session = session
     }
 
-    func fetchProducts(limit: Int, skip: Int) async throws -> [Product] {
+    func fetchProducts(limit: Int, skip: Int, sortBy: String? = nil, order: String? = nil) async throws -> [Product] {
 //        print("\(#function) \(Thread.)")
-        guard let url = URL(string: "https://dummyjson.com/products?limit=\(limit)&skip=\(skip)") else {
+        var urlString = "https://dummyjson.com/products?limit=\(limit)&skip=\(skip)"
+        if let sortBy { urlString += "&sortBy=\(sortBy)" }
+        if let order { urlString += "&order=\(order)" }
+
+        guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
 

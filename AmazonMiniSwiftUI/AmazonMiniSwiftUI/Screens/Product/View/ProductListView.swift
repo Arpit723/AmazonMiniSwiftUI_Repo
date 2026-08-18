@@ -80,6 +80,21 @@ struct ProductListView: View {
                             Image(systemName: "clock.arrow.circlepath").foregroundStyle(Color.brandNavy)
                         }
                     }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            Picker("Sort by", selection: Binding(
+                                get: { viewModel.sortOption },
+                                set: { viewModel.selectSort($0) }
+                            )) {
+                                ForEach(SortOption.allCases) { option in
+                                    Text(option.label).tag(option)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down.circle")
+                                .foregroundStyle(Color.brandNavy)
+                        }
+                    }
                 }
             
             
