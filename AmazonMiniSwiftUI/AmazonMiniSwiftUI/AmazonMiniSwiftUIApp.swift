@@ -22,6 +22,7 @@ struct AmazonMiniSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .preferredColorScheme(.light)
                 .environment(authViewModel)
                 .environment(cartViewModel)
                 .environment(checkoutViewModel)

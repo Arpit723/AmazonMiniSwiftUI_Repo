@@ -19,8 +19,12 @@ protocol PaymentServicing: Sendable {
 struct PaymentService: PaymentServicing {
     func processPayment(amount: Double) async throws -> PaymentResult {
         try await Task.sleep(for: .seconds(2))
-        return Double.random(in: 0...1) < 0.85
-            ? .success(transactionId: UUID().uuidString)
-            : .failure(reason: "Card declined")
+        // Deterministic mock: a demo checkout always succeeds for a payable
+        // amount and only fails for non-positive totals (previously this
+        // randomly declined ~15% of the time regardless of cart contents).
+        guard amount > 0 else {
+            return .failure(reason: "Invalid amount")
+        }
+        return .success(transactionId: UUID().uuidString)
     }
 }
