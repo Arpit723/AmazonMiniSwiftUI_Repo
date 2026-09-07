@@ -49,6 +49,11 @@ struct SettingsView: View {
                 }
                 .disabled(isDeleting)
             }
+
+            Section {
+                LabeledContent("Version", value: "\(appVersion) (\(appBuild))")
+                LabeledContent("Bundle ID", value: bundleId)
+            }
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
@@ -77,6 +82,21 @@ struct SettingsView: View {
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
             }
         }
+    }
+
+    // Same pattern as AboutView.swift's appVersion/appBuild — duplicated rather than
+    // shared since it's only two small screens; extract into a shared helper if a
+    // third screen needs this.
+    private var appVersion: String {
+        (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "1.0"
+    }
+
+    private var appBuild: String {
+        (Bundle.main.infoDictionary?["CFBundleVersion"] as? String) ?? "1"
+    }
+
+    private var bundleId: String {
+        Bundle.main.bundleIdentifier ?? "—"
     }
 
     @ViewBuilder
