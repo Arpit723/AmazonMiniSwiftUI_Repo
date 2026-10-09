@@ -48,6 +48,44 @@ actor ProductService {
         return decoded.products
     }
     
+    func fetchCategories() async throws -> [ProductCategory] {
+        print("\(#function)")
+
+        guard let url = URL(string: "https://dummyjson.com/products/categories") else {
+            throw URLError(.badURL)
+        }
+        print("URL \(url.absoluteString)")
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+
+        return try JSONDecoder().decode([ProductCategory].self, from: data)
+    }
+
+    func fetchProducts(category: String, limit: Int, skip: Int, sortBy: String? = nil, order: String? = nil) async throws -> [Product] {
+        var urlString = "https://dummyjson.com/products/category/\(category)?limit=\(limit)&skip=\(skip)"
+        if let sortBy { urlString += "&sortBy=\(sortBy)" }
+        if let order { urlString += "&order=\(order)" }
+
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        print("URL \(url.absoluteString)")
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoded = try JSONDecoder().decode(ProductResponse.self, from: data)
+        return decoded.products
+    }
+
     func fetchProductDetail(productId: Int) async throws -> ProductDetail {
         print("\(#function)")
 

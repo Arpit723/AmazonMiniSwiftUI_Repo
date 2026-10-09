@@ -14,10 +14,13 @@ struct ProductListView: View {
                 } else if let error = viewModel.error {
                     Text("Error: \(error)").foregroundStyle(.red)
                 } else {
-                    listOfProdcutsView
-                        .navigationDestination(for: Int.self) { productId in
-                            ProductDetailView(productId: productId).chevronOnlyBackButton()
-                        }
+                    VStack(spacing: 0) {
+                        categoryChips
+                        listOfProdcutsView
+                    }
+                    .navigationDestination(for: Int.self) { productId in
+                        ProductDetailView(productId: productId).chevronOnlyBackButton()
+                    }
                 }
             }.searchable(text: $viewModel.searchText)
                 .onChange(of: viewModel.searchText) {
@@ -103,10 +106,35 @@ struct ProductListView: View {
 //                }
                 .task {
                     await viewModel.loadProducts()
+                    await viewModel.loadCategories()
                 }
         }
     }
     
+    private var categoryChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: AppSpacing.sm) {
+                CategoryChip(
+                    label: "All",
+                    isSelected: viewModel.selectedCategory == nil
+                ) {
+                    viewModel.selectCategory(nil)
+                }
+
+                ForEach(viewModel.categories) { category in
+                    CategoryChip(
+                        label: category.name,
+                        isSelected: viewModel.selectedCategory == category.slug
+                    ) {
+                        viewModel.selectCategory(category.slug)
+                    }
+                }
+            }
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.vertical, AppSpacing.sm)
+        }
+    }
+
     private var listOfProdcutsView: some View {
         
         
@@ -142,6 +170,30 @@ struct ProductListView: View {
         }
 
         
+    }
+}
+
+private struct CategoryChip: View {
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(label)
+                .font(AppFont.footnote.weight(.semibold))
+                .foregroundStyle(isSelected ? Color.white : Color.brandNavy)
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.vertical, AppSpacing.xs)
+                .background(
+                    Capsule()
+                        .fill(isSelected ? Color.brandOrange : Color.fieldBackground)
+                        .overlay(Capsule().stroke(Color.fieldBorder, lineWidth: 1))
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Category \(label)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

@@ -9,6 +9,8 @@ final class ProductListViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var canLoadMorePages = true
     @Published var sortOption: SortOption = .relevance
+    @Published var categories: [ProductCategory] = []
+    @Published var selectedCategory: String? = nil
     private var skipCount: Int = 0
     private var limit: Int = 25
 
@@ -16,6 +18,7 @@ final class ProductListViewModel: ObservableObject {
 
     private var searchTask: Task<Void, Never>?
     private var sortTask: Task<Void, Never>?
+    private var categoryTask: Task<Void, Never>?
 
    
     init(service: ProductService = ProductService()) {
@@ -34,18 +37,49 @@ final class ProductListViewModel: ObservableObject {
         skipCount = 0
         if searchText.isEmpty {
             do {
-                self.products = try await service.fetchProducts(
-                    limit: self.limit,
-                    skip: self.skipCount,
-                    sortBy: sortOption.sortBy,
-                    order: sortOption.order
-                )
+                let fetched: [Product]
+                if let selectedCategory {
+                    fetched = try await service.fetchProducts(
+                        category: selectedCategory,
+                        limit: self.limit,
+                        skip: self.skipCount,
+                        sortBy: sortOption.sortBy,
+                        order: sortOption.order
+                    )
+                } else {
+                    fetched = try await service.fetchProducts(
+                        limit: self.limit,
+                        skip: self.skipCount,
+                        sortBy: sortOption.sortBy,
+                        order: sortOption.order
+                    )
+                }
+                self.products = fetched
                 self.isLoading = false
             } catch {
                 self.error = error.localizedDescription
             }
         } else {
             await self.performSearch(query: searchText)
+        }
+    }
+
+    func loadCategories() async {
+        do {
+            categories = try await service.fetchCategories()
+        } catch {
+            // Category chips degrade silently; the product list stays usable.
+        }
+    }
+
+    func selectCategory(_ category: String?) {
+        guard selectedCategory != category else { return }
+        selectedCategory = category
+        searchText = ""
+        searchTask?.cancel()
+        categoryTask?.cancel()
+        categoryTask = Task {
+            await loadProducts()
         }
     }
 
@@ -66,14 +100,25 @@ final class ProductListViewModel: ObservableObject {
         self.error = nil
 
         do {
-            let fetched =
-                searchText.isEmpty
-                ? try await service.fetchProducts(
+            let fetched: [Product]
+            if !searchText.isEmpty {
+                fetched = try await service.searchProducts(searchText: searchText)
+            } else if let selectedCategory {
+                fetched = try await service.fetchProducts(
+                    category: selectedCategory,
                     limit: limit,
                     skip: 0,
                     sortBy: sortOption.sortBy,
                     order: sortOption.order
-                ) : try await service.searchProducts(searchText: searchText)
+                )
+            } else {
+                fetched = try await service.fetchProducts(
+                    limit: limit,
+                    skip: 0,
+                    sortBy: sortOption.sortBy,
+                    order: sortOption.order
+                )
+            }
             products = fetched
             error = nil
 
@@ -90,17 +135,28 @@ final class ProductListViewModel: ObservableObject {
 
 
         do {
-            let products = try await service.fetchProducts(
+            let fetched: [Product]
+            if let selectedCategory, searchText.isEmpty {
+                fetched = try await service.fetchProducts(
+                    category: selectedCategory,
                     limit: limit,
                     skip: products.count,
                     sortBy: sortOption.sortBy,
                     order: sortOption.order
                 )
-            self.products.append(contentsOf: products)
+            } else {
+                fetched = try await service.fetchProducts(
+                    limit: limit,
+                    skip: products.count,
+                    sortBy: sortOption.sortBy,
+                    order: sortOption.order
+                )
+            }
+            self.products.append(contentsOf: fetched)
             self.error = nil
             self.isLoadingNextPage = false
             self.skipCount += self.limit
-            self.canLoadMorePages = (products.count == self.limit)
+            self.canLoadMorePages = (fetched.count == self.limit)
         } catch {
             self.error = error.localizedDescription
         }
@@ -119,6 +175,7 @@ final class ProductListViewModel: ObservableObject {
             await loadProducts()
             return
         }
+        selectedCategory = nil
         isLoading = true
         error = nil
         self.canLoadMorePages = false
@@ -130,9 +187,10 @@ final class ProductListViewModel: ObservableObject {
         }
         self.isLoading = false
     }
-    
+
     func searchTextChanged() {
         searchTask?.cancel()
+        if searchText.isEmpty && selectedCategory != nil { return }
         searchTask = Task {
             try? await Task.sleep(for: .milliseconds(500))
             guard !Task.isCancelled else { return }
