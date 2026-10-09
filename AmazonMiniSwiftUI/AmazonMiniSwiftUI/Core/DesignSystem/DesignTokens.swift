@@ -31,6 +31,7 @@ extension Color {
     static let brandSecondary = Color(hex: 0x565959)     // captions / hints
     static let brandOrange = Color(hex: 0xFF9900)        // primary actions / accent
     static let brandOrangePressed = Color(hex: 0xE88B00)
+    static let brandOrangeDisabled = Color(hex: 0xCC8322) // darker/muted disabled CTA
 
     // Surfaces
     static let surface = Color.white

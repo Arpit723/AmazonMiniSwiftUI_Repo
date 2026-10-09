@@ -50,7 +50,7 @@ struct PrimaryButton: View {
             .padding(.vertical, AppSpacing.md + 2)
             .background(
                 RoundedRectangle(cornerRadius: AppRadius.md, style: .continuous)
-                    .fill(Color.brandOrange.opacity(isEnabled ? 1 : 0.45))
+                    .fill(isEnabled ? Color.brandOrange : Color.brandOrangeDisabled)
             )
         }
         .buttonStyle(.plain)
