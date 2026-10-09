@@ -8,106 +8,83 @@ struct ProductListView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView()
-                } else if let error = viewModel.error {
-                    Text("Error: \(error)").foregroundStyle(.red)
-                } else {
-                    VStack(spacing: 0) {
-                        categoryChips
+            VStack(spacing: 0) {
+                categoryChips
+
+                Group {
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if let error = viewModel.error {
+                        Text("Error: \(error)")
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
                         listOfProdcutsView
                     }
-                    .navigationDestination(for: Int.self) { productId in
-                        ProductDetailView(productId: productId).chevronOnlyBackButton()
+                }
+            }
+            .navigationDestination(for: Int.self) { productId in
+                ProductDetailView(productId: productId).chevronOnlyBackButton()
+            }
+            .searchable(text: $viewModel.searchText)
+            .onChange(of: viewModel.searchText) {
+                viewModel.searchTextChanged()
+            }
+            .navigationTitle("Products")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    NavigationLink {
+                        SettingsView().chevronOnlyBackButton()
+                    } label: {
+                        Image(systemName: "person.crop.circle").foregroundStyle(Color.brandNavy)
                     }
                 }
-            }.searchable(text: $viewModel.searchText)
-                .onChange(of: viewModel.searchText) {
-                    viewModel.searchTextChanged()
-                }
-                .navigationTitle("Products")
-            /*
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showCart = true
-                        } label: {
-                            Image(systemName: "cart").foregroundStyle(Color.brandNavy)
-                                .overlay(alignment: .topTrailing) {
-                                    if cartViewModel.itemCount > 0 {
-                                        Text("\(cartViewModel.itemCount)")
-                                            .font(.caption2)
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                            .padding(5)
-                                            .background(Color.red, in: Circle())
-                                            .offset(x: 7, y: -7)
-                                    }
-                                }
-                        }
-                        .accessibilityLabel("Cart, \(cartViewModel.itemCount) items")
-                    }
-                }
-             */
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        NavigationLink {
-                            SettingsView().chevronOnlyBackButton()
-                        } label: {
-                            Image(systemName: "person.crop.circle").foregroundStyle(Color.brandNavy)
-                        }
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        NavigationLink { CartView().chevronOnlyBackButton() } label: { /* your existing cart icon */
-                        
-                            Image(systemName: "cart").foregroundStyle(Color.brandNavy)
-                                .overlay(alignment: .topTrailing) {
-                                    if cartViewModel.itemCount > 0 {
-                                        Text("\(cartViewModel.itemCount)")
-                                            .font(.caption2)
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                            .padding(5)
-                                            .background(Color.red, in: Circle())
-                                            .offset(x: 7, y: -7)
-                                    }
-                                }
-                            
-                        }
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        NavigationLink {
-                            OrderHistoryView().chevronOnlyBackButton()
-                        } label: {
-                            Image(systemName: "clock.arrow.circlepath").foregroundStyle(Color.brandNavy)
-                        }
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Menu {
-                            Picker("Sort by", selection: Binding(
-                                get: { viewModel.sortOption },
-                                set: { viewModel.selectSort($0) }
-                            )) {
-                                ForEach(SortOption.allCases) { option in
-                                    Text(option.label).tag(option)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink { CartView().chevronOnlyBackButton() } label: { /* your existing cart icon */
+
+                        Image(systemName: "cart").foregroundStyle(Color.brandNavy)
+                            .overlay(alignment: .topTrailing) {
+                                if cartViewModel.itemCount > 0 {
+                                    Text("\(cartViewModel.itemCount)")
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.white)
+                                        .padding(5)
+                                        .background(Color.red, in: Circle())
+                                        .offset(x: 7, y: -7)
                                 }
                             }
-                        } label: {
-                            Image(systemName: "arrow.up.arrow.down.circle")
-                                .foregroundStyle(Color.brandNavy)
-                        }
+
                     }
                 }
-            
-            
-//                .navigationDestination(isPresented: $showCart) {
-//                    CartView()
-//                }
-                .task {
-                    await viewModel.loadProducts()
-                    await viewModel.loadCategories()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink {
+                        OrderHistoryView().chevronOnlyBackButton()
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath").foregroundStyle(Color.brandNavy)
+                    }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Picker("Sort by", selection: Binding(
+                            get: { viewModel.sortOption },
+                            set: { viewModel.selectSort($0) }
+                        )) {
+                            ForEach(SortOption.allCases) { option in
+                                Text(option.label).tag(option)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down.circle")
+                            .foregroundStyle(Color.brandNavy)
+                    }
+                }
+            }
+            .task {
+                await viewModel.loadProducts()
+                await viewModel.loadCategories()
+            }
         }
     }
     
