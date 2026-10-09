@@ -16,6 +16,10 @@ final class ProductListViewModel: ObservableObject {
 
     private let service: ProductService
 
+    private func isCancelled(_ error: Error) -> Bool {
+        error is CancellationError || (error as? URLError)?.code == .cancelled
+    }
+
     private var searchTask: Task<Void, Never>?
     private var sortTask: Task<Void, Never>?
     private var categoryTask: Task<Void, Never>?
@@ -57,7 +61,9 @@ final class ProductListViewModel: ObservableObject {
                 self.products = fetched
                 self.isLoading = false
             } catch {
+                if isCancelled(error) { return }
                 self.error = error.localizedDescription
+                self.isLoading = false
             }
         } else {
             await self.performSearch(query: searchText)
@@ -73,7 +79,7 @@ final class ProductListViewModel: ObservableObject {
     }
 
     func selectCategory(_ category: String?) {
-        guard selectedCategory != category else { return }
+        guard selectedCategory != category || !searchText.isEmpty else { return }
         selectedCategory = category
         searchText = ""
         searchTask?.cancel()
@@ -123,6 +129,7 @@ final class ProductListViewModel: ObservableObject {
             error = nil
 
         } catch {
+            if isCancelled(error) { return }
             self.error = error.localizedDescription
         }
         //
@@ -158,9 +165,11 @@ final class ProductListViewModel: ObservableObject {
             self.skipCount += self.limit
             self.canLoadMorePages = (fetched.count == self.limit)
         } catch {
+            if isCancelled(error) { return }
             self.error = error.localizedDescription
+            self.isLoadingNextPage = false
         }
-        
+
     }
     
     
@@ -183,6 +192,7 @@ final class ProductListViewModel: ObservableObject {
             self.products = try await service.searchProducts(searchText: query)
             self.error = nil
         } catch {
+            if isCancelled(error) { return }
             self.error = error.localizedDescription
         }
         self.isLoading = false

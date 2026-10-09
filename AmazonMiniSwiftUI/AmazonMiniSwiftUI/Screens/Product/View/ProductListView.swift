@@ -82,8 +82,9 @@ struct ProductListView: View {
                 }
             }
             .task {
-                await viewModel.loadProducts()
-                await viewModel.loadCategories()
+                async let products: Void = viewModel.loadProducts()
+                async let categories: Void = viewModel.loadCategories()
+                _ = await (products, categories)
             }
         }
     }

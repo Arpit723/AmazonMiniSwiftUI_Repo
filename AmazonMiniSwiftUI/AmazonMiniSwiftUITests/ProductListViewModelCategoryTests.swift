@@ -18,9 +18,16 @@ final class ProductListViewModelCategoryTests: XCTestCase {
     }
 
     private func waitUntil(_ condition: () -> Bool) async {
-        for _ in 0..<10_000 where !condition() {
-            await Task.yield()
+        for _ in 0..<500 where !condition() {
+            try? await Task.sleep(for: .milliseconds(10))
         }
+    }
+
+    private func productsData(ids: [Int]) -> Data {
+        let products = ids.map { id in
+            #"{"id":\#(id),"title":"P\#(id)","description":"d","category":"c","price":1,"discountPercentage":1,"rating":1,"stock":1,"brand":null,"thumbnail":"t"}"#
+        }.joined(separator: ",")
+        return Data(#"{"products":[\#(products)],"total":\#(ids.count),"skip":0,"limit":25}"#.utf8)
     }
 
     override func tearDown() {
@@ -113,6 +120,68 @@ final class ProductListViewModelCategoryTests: XCTestCase {
             return requestURLs[(categoryIndex + 1)...].contains { $0.path == "/products" }
         }
 
+        XCTAssertEqual(vm.selectedCategory, nil)
+    }
+
+    func testLoadProducts_failure_setsErrorAndClearsLoading() async {
+        MockURLProtocol.handler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 500, httpVersion: nil, headerFields: nil)!
+            return (response, Data("{}".utf8))
+        }
+        let vm = makeViewModel()
+
+        await vm.loadProducts()
+
+        XCTAssertNotNil(vm.error)
+        XCTAssertFalse(vm.isLoading)
+    }
+
+    func testRapidCategorySwitches_lastSelectionWinsWithoutError() async {
+        let beautyData = productsData(ids: [1])
+        let fragrancesData = productsData(ids: [2])
+        let emptyData = Data(#"{"products":[],"total":0,"skip":0,"limit":0}"#.utf8)
+        MockURLProtocol.handler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            if request.url?.path == "/products/category/beauty" {
+                Thread.sleep(forTimeInterval: 0.08)
+                return (response, beautyData)
+            }
+            if request.url?.path == "/products/category/fragrances" {
+                return (response, fragrancesData)
+            }
+            return (response, emptyData)
+        }
+        let vm = makeViewModel()
+
+        vm.selectCategory("beauty")
+        vm.selectCategory("fragrances")
+
+        await waitUntil { vm.products.map(\.id) == [2] }
+        try? await Task.sleep(for: .milliseconds(200))
+
+        XCTAssertEqual(vm.selectedCategory, "fragrances")
+        XCTAssertEqual(vm.products.map(\.id), [2])
+        XCTAssertNil(vm.error)
+        XCTAssertFalse(vm.isLoading)
+    }
+
+    func testSelectAll_duringActiveSearch_clearsSearchAndReloads() async {
+        let searchData = productsData(ids: [99])
+        let allData = productsData(ids: [7])
+        MockURLProtocol.handler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            if request.url?.path == "/products/search" {
+                return (response, searchData)
+            }
+            return (response, allData)
+        }
+        let vm = makeViewModel()
+        vm.searchText = "phone"
+
+        vm.selectCategory(nil)
+
+        XCTAssertEqual(vm.searchText, "")
+        await waitUntil { vm.products.map(\.id) == [7] }
         XCTAssertEqual(vm.selectedCategory, nil)
     }
 }
